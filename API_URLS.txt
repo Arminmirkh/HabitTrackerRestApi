@@ -1,0 +1,50 @@
+HABIT TRACKER API - URL REFERENCE
+All routes are prefixed with /api/ (e.g. http://localhost:8000/api/login/)
+Auth = requires header: Authorization: Bearer <access_token>
+
+=== ACCOUNTS (auth & profile) ===
+
+POST   /api/register/         : Create a new user account (username, email, password, age, gender). Returns the user plus an access + refresh JWT pair.
+POST   /api/login/            : Log in with email + password. Returns the user plus an access + refresh JWT pair.
+POST   /api/logout/           : Auth. Blacklists a refresh token (send {"refresh": "<refresh_token>"}) so it can no longer be used to get new access tokens.
+POST   /api/token/refresh/    : Exchange a valid refresh token (send {"refresh": "<refresh_token>"}) for a new access token, without logging in again.
+GET    /api/me/               : Auth. Get the logged-in user's own profile (id, username, email, first/last name, age, gender).
+PATCH  /api/me/               : Auth. Update the logged-in user's own profile (any subset of email, first_name, last_name, age, gender).
+
+=== GOALS ===
+
+GET    /api/goals/            : Auth. List the logged-in user's goals. Filters: ?status=active|completed|paused, ?category=<choice>
+POST   /api/goals/             : Auth. Create a new goal (title, description, category, status).
+GET    /api/goals/{id}/       : Auth. Retrieve one goal (must belong to the caller).
+PUT    /api/goals/{id}/       : Auth. Replace a goal's fields entirely.
+PATCH  /api/goals/{id}/       : Auth. Partially update a goal.
+DELETE /api/goals/{id}/       : Auth. Delete a goal.
+
+=== HABITS ===
+
+GET    /api/habits/                    : Auth. List the logged-in user's habits. Filters: ?goal=<id>, ?is_active=true|false, ?frequency=<choice>
+POST   /api/habits/                    : Auth. Create a single habit (goal, title, description, frequency, daily_goal, unit, streak_goal, difficulty, reminder_time, is_active).
+GET    /api/habits/{id}/               : Auth. Retrieve one habit (must belong to the caller).
+PUT    /api/habits/{id}/               : Auth. Replace a habit's fields entirely.
+PATCH  /api/habits/{id}/               : Auth. Partially update a habit.
+DELETE /api/habits/{id}/               : Auth. Delete a habit.
+POST   /api/habits/bulk-create/        : Auth. Create many habits in one request. Body is a JSON list of habit objects. All-or-nothing: if one item is invalid, nothing is saved.
+POST   /api/habits/{id}/check-in/      : Auth. Mark *today's* record for this habit done/not done (creates it if missing, updates it if it exists) and updates the habit's streak. Body (optional): {"done": true, "note": "...", "energy": 4, "mood": 5}
+GET    /api/habits/overall-streak/     : Auth. Cross-habit streak: consecutive days on which the user completed at least one habit (any habit), independent of any single habit's own streak. Also self-heals User.overall_streak / overall_best_streak.
+
+=== HABIT RECORDS (daily completion log) ===
+
+GET    /api/habit-records/             : Auth. List completion records for the caller's habits. Filters: ?habit=<id>, ?date=YYYY-MM-DD, ?date_from=YYYY-MM-DD, ?date_to=YYYY-MM-DD
+POST   /api/habit-records/             : Auth. Create a record for a specific habit + date (habit, date, done, energy, mood, failure_reason, note).
+GET    /api/habit-records/{id}/        : Auth. Retrieve one record (must belong to one of the caller's habits).
+PUT    /api/habit-records/{id}/        : Auth. Replace a record's fields entirely.
+PATCH  /api/habit-records/{id}/        : Auth. Partially update a record.
+DELETE /api/habit-records/{id}/        : Auth. Delete a record.
+
+=== AI ===
+
+POST   /api/ai/generate-habits/        : Auth. Body: {"goal": "run a 10k"}. Calls the AI model and returns 3-5 suggested habits as JSON. Nothing is saved -- use POST /api/habits/ or /api/habits/bulk-create/ to keep any of them.
+
+=== ADMIN ===
+
+GET    /admin/                         : Django admin site (staff/superuser login required, separate from the JWT API auth).
