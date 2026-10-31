@@ -22,8 +22,8 @@ Python, Django 5.2, Django REST Framework, Simple JWT, drf-spectacular, Groq API
 ### 1. Clone and install
 
 ```bash
-git clone https://github.com/Arminmirkh/habit-tracker-api.git
-cd habit-tracker-api
+git clone https://github.com/Arminmirkh/HabitTrackerRestApi.git
+cd HabitTrackerRestApi
 python -m venv venv
 venv\Scripts\activate        # on macOS/Linux: source venv/bin/activate
 pip install -r requirements.txt
